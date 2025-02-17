@@ -1,5 +1,6 @@
 import sys
 import tensorflow as tf
+import numpy as np
 
 from PIL import Image, ImageDraw, ImageFont
 from transformers import AutoTokenizer, TFBertForMaskedLM
@@ -45,8 +46,14 @@ def get_mask_token_index(mask_token_id, inputs):
     Return the index of the token with the specified `mask_token_id`, or
     `None` if not present in the `inputs`.
     """
+    
     # TODO: Implement this function
-    raise NotImplementedError
+    arr = inputs["input_ids"]
+    index = np.where(arr == mask_token_id)
+    if index[0].size == 0 and index[1].size == 0:
+        return None
+    return index[1][0]
+    
 
 
 
@@ -56,9 +63,9 @@ def get_color_for_attention_score(attention_score):
     given `attention_score`. Each value should be in the range [0, 255].
     """
     # TODO: Implement this function
-    raise NotImplementedError
-
-
+    attention_score = float(attention_score)
+    v = round(255 * attention_score)
+    return (v, v, v)
 
 def visualize_attentions(tokens, attentions):
     """
@@ -71,12 +78,18 @@ def visualize_attentions(tokens, attentions):
     (starting count from 1).
     """
     # TODO: Update this function to produce diagrams for all layers and heads.
-    generate_diagram(
-        1,
-        1,
-        tokens,
-        attentions[0][0][0]
-    )
+
+    n_layers = 12
+    n_heads = 12
+
+    for n_layer in range(n_layers):
+        for n_head in range(n_heads):
+            generate_diagram(
+                n_layer + 1,
+                n_head + 1,
+                tokens,
+                attentions[n_layer][0][n_head]
+            )
 
 
 def generate_diagram(layer_number, head_number, tokens, attention_weights):
